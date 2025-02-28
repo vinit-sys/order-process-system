@@ -28,7 +28,6 @@ Thumbs.db
 # Python dependency files
 Pipfile
 Pipfile.lock
-requirements.txt
 
 # Docker files
 *.dockerignore

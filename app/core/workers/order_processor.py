@@ -8,7 +8,7 @@ import time
 from app.core.workers.base import BaseWorker
 import time
 import os
-from app.tasks.push_order_to_db import push_order_to_db
+from app.tasks.order_save import push_order_to_db
 from app.core.logging import worker_logger
 from app.services.redis_service import redis_service
 from app.connections.database import db

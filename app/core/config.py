@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     BATCH_SIZE: int = 100
     PROCESSING_WORKERS: int = 10
     NUM_WORKERS: int = 3
-    DB_PATH: str = "/Users/vinit.kumar/Desktop/python-play/order_processing_system/rdl.db"
+    DB_PATH: str = "/Users/vinit.kumar/order-process-system/rdl.db"
     DB_ECHO_LOG: bool = True
     WORKER_PROCESSES: int = 1
     

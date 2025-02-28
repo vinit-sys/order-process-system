@@ -7,7 +7,6 @@ from app.connections.database import db
 from app.models.managers.orders import OrderManager
 from sqlalchemy.orm import Session
 from datetime import datetime
-from app.tasks.push_order_to_db import push_order_to_db
 from app.services.redis_service import redis_service
 import json
 
