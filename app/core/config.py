@@ -1,4 +1,7 @@
-from pydantic_settings import BaseSettings
+import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+DOTENV = os.path.join(os.path.dirname(__file__), ".env")
 
 class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6000"
@@ -9,7 +12,6 @@ class Settings(BaseSettings):
     DB_ECHO_LOG: bool = True
     WORKER_PROCESSES: int = 1
     
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(env_file=DOTENV)
 
 settings = Settings()

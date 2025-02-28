@@ -22,7 +22,6 @@ class BaseWorker:
                 target=self._run,
                 name=f"{self.name}-{i}",
             )
-            print(f"stadsfsfdksfsdlfshfgldsfhdksghlsdhl")
             process.start()
             self.processes.append(process)
             logger.info(f"{process.name} started with PID {process.pid}")
