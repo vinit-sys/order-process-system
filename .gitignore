@@ -1,0 +1,40 @@
+# Byte-compiled / cached files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env/
+
+# Redis dump files
+dump.rdb
+appendonly.aof
+
+# Logs and databases
+*.log
+*.sqlite3
+
+# IDE/editor specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Python dependency files
+Pipfile
+Pipfile.lock
+requirements.txt
+
+# Docker files
+*.dockerignore
+docker-compose.override.yml
+
+# Secrets and credentials
+.env
+*.key
+*.pem
