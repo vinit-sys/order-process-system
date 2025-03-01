@@ -132,6 +132,10 @@ The Postman collection includes the following API requests:
 
 This collection allows you to test order creation, order status retrieval, system metrics, and queue status. 🚀
 
+# Sequence Diagram
+
+![Alt text](order_processing.png "Title")
+
 # Scalable Order Processing System
 
 ## 🚀 Overview
