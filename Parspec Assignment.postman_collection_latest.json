@@ -18,7 +18,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\"user_id\":\"user123\",\"item_ids\":[\"item1\",\"item2\"],\"total_amount\":99.99}",
+					"raw": "{\n    \"user_id\": \"201a8e4a-c775-4266-a151-9db20b786f2d\",\n    \"item_ids\": [\n        \"22cb61f8-58fc-4a29-b6a1-65b469d58561\"\n    ],\n    \"total_amount\": 999.99\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -78,7 +78,7 @@
 					"header": [
 						{
 							"key": "date",
-							"value": "Sat, 01 Mar 2025 02:22:33 GMT"
+							"value": "Sat, 01 Mar 2025 10:11:47 GMT"
 						},
 						{
 							"key": "server",
@@ -86,7 +86,7 @@
 						},
 						{
 							"key": "content-length",
-							"value": "32"
+							"value": "245"
 						},
 						{
 							"key": "content-type",
@@ -94,47 +94,9 @@
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"order_id\": \"ORD-1740795753808\"\n}"
+					"body": "{\n    \"total_amount\": 999.99,\n    \"user_id\": \"201a8e4a-c775-4266-a151-9db20b786f2d\",\n    \"completed_at\": null,\n    \"updated_at\": \"2025-03-01T10:11:47.509155\",\n    \"order_id\": \"ORD-f7037b2d6cb34e36a998594426a8ec67\",\n    \"status\": \"pending\",\n    \"created_at\": \"2025-03-01T10:11:47.509153\"\n}"
 				}
 			]
-		},
-		{
-			"name": "aws-server: order",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"user_id\": \"201a8e4a-c775-4266-a151-9db20b786f2d\",\n    \"item_ids\": [\n        \"22cb61f8-58fc-4a29-b6a1-65b469d58561\"\n    ],\n    \"total_amount\": 999.99\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://51.20.56.95:8000/orders/",
-					"protocol": "http",
-					"host": [
-						"51",
-						"20",
-						"56",
-						"95"
-					],
-					"port": "8000",
-					"path": [
-						"orders",
-						""
-					]
-				},
-				"description": "Generated from cURL: curl -X POST \"http://localhost:8000/orders/\" -H \"Content-Type: application/json\" -d '{\"user_id\":\"user123\",\"item_ids\":[\"item1\",\"item2\"],\"total_amount\":99.99}'"
-			},
-			"response": []
 		},
 		{
 			"name": "localhost: order-status",
@@ -142,7 +104,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8000/orders/ORD-1234567890",
+					"raw": "http://localhost:8000/orders/ORD-f7037b2d6cb34e36a998594426a8ec67",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -150,7 +112,7 @@
 					"port": "8000",
 					"path": [
 						"orders",
-						"ORD-1234567890"
+						"ORD-f7037b2d6cb34e36a998594426a8ec67"
 					]
 				},
 				"description": "Generated from cURL: curl \"http://localhost:8000/orders/ORD-1234567890\""
@@ -199,27 +161,6 @@
 					"body": "{\n    \"order_id\": \"ORD-1740795753808\",\n    \"status\": \"completed\",\n    \"created_at\": \"2025-03-01T02:22:33.831868\",\n    \"user_id\": \"201a8e4a-c775-4266-a151-9db20b786f2d\",\n    \"total_amount\": 999.99,\n    \"completed_at\": null,\n    \"updated_at\": \"2025-03-01T02:22:34.081146\"\n}"
 				}
 			]
-		},
-		{
-			"name": "aws-server: order-status",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8000/orders/ORD-1234567890",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8000",
-					"path": [
-						"orders",
-						"ORD-1234567890"
-					]
-				},
-				"description": "Generated from cURL: curl \"http://localhost:8000/orders/ORD-1234567890\""
-			},
-			"response": []
 		},
 		{
 			"name": "localhost: metrics",
@@ -303,7 +244,51 @@
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"name": "order status queue",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/orders/status/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"orders",
+								"status",
+								""
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "date",
+							"value": "Sat, 01 Mar 2025 10:03:04 GMT"
+						},
+						{
+							"key": "server",
+							"value": "uvicorn"
+						},
+						{
+							"key": "content-length",
+							"value": "58"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"queue_length\": 0,\n    \"pending_orders\": [],\n    \"total_processed\": 0\n}"
+				}
+			]
 		}
 	]
 }

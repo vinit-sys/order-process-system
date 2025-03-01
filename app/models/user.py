@@ -3,7 +3,10 @@ from app.models.base import BaseModel
 from app.connections.database import db
 import uuid
 
+
 class User(BaseModel, db.Base):
+    """Model representing a user in the system."""
+
     __tablename__ = "users"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

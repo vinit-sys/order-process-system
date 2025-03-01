@@ -1,7 +1,6 @@
 from pydantic import BaseModel
-from typing import List, Optional
-from datetime import datetime
-from app.models.order import OrderStatus
+from typing import List
+
 
 class OrderCreate(BaseModel):
     user_id: str
