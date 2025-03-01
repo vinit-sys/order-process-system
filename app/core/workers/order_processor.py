@@ -8,7 +8,7 @@ import time
 from app.core.workers.base import BaseWorker
 import time
 import os
-from app.tasks.order_save import push_order_to_db
+from app.tasks.order_save import push_order_to_pipeline
 from app.core.logging import worker_logger
 from app.services.redis_service import redis_service
 from app.connections.database import db
@@ -80,11 +80,11 @@ class RedisOrderProcessor(BaseWorker):
 
     def run(self):
         while True:
-            task  = redis_service.redis_conn.lpop("test_check")
+            task  = redis_service.redis_conn.lpop("push_order_to_pipeline")
             if task:
                 try:
                     task_data = json.loads(task)
-                    asyncio.run(push_order_to_db(task_data,task_data["order_id"]))
+                    asyncio.run(push_order_to_pipeline(task_data["order_id"]))
                     print(f"Executed push_order_to_db with result:")
                 except Exception as e:
                     print(f"Error executing task: {e}")

@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 from app.services.redis_service import redis_service
 import json
+import uuid
 
 
 router = APIRouter()
@@ -18,10 +19,15 @@ async def create_order(
     order: schemas.OrderCreate,
     background_tasks: BackgroundTasks,
 ):
-    order_id=f"ORD-{int(datetime.now().timestamp()*1000)}"
-    order_data = json.dumps({"order_id": order_id, **order.dict()})
-    redis_service.redis_conn.rpush("test_check", order_data)
-    return {"order_id":order_id}
+    order_id = f"ORD-{uuid.uuid4().hex}"
+    order_data = json.dumps({"order_id": order_id})
+
+    async with db.session() as session:
+        order_manager = OrderManager(session)
+        new_order = await order_manager.create_order(order_id,order.user_id,order.item_ids,order.total_amount)
+    print(f"orfeff:{order_data}")
+    redis_service.redis_conn.rpush("push_order_to_pipeline", order_data)
+    return new_order
 
 
 @router.get("/status")

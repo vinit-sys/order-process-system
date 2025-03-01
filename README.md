@@ -107,3 +107,136 @@ The Postman collection includes the following API requests:
   ```
 
 This collection allows you to test order creation, order status retrieval, system metrics, and queue status. 🚀
+
+# Scalable Order Processing System
+
+## 🚀 Overview
+This is a highly scalable order-processing system designed to handle **1000+ concurrent orders** efficiently. It utilizes **FastAPI, SQLite, Redis, and Custom Worker Processes** to process orders asynchronously and update order statuses dynamically.
+
+## 🏗️ Architecture Design
+
+### 📌 System Workflow
+1️⃣ **Order Creation API (FastAPI)**
+   - Accepts `user_id`, `item_ids`, and `total_amount`.
+   - Stores order **in SQLite** (initially **PENDING** state).
+   - Pushes `order_id` to **Redis queue** for background processing.
+   - Returns `order_id` instantly.
+
+2️⃣ **Redis Queue**
+   - Acts as a **message broker**.
+   - Stores orders in **FIFO order** for processing by workers.
+
+3️⃣ **Custom Worker Process**
+   - Fetches `order_id` from Redis queue.
+   - Updates order **status → PROCESSING**.
+   - Simulates order processing (e.g., payment verification, stock check).
+   - Updates order **status → COMPLETED** in the database.
+   - Updates Redis with **order metrics** (total orders processed, avg time, etc.).
+
+4️⃣ **Metrics API (FastAPI)**
+   - Fetches key insights:
+     - **Total orders processed**.
+     - **Average processing time**.
+     - **Orders count per status (PENDING, PROCESSING, COMPLETED)**.
+   - Uses **Redis for real-time metrics** to avoid slow DB queries.
+
+## 📊 System Design Diagram
+```
++-----------------------+
+|   Order API (FastAPI) |
++-----------------------+
+           │
+           ▼
++---------------------+
+|  SQLite Database  |
++---------------------+
+           │
+           ▼
++-------------------+
+| Redis Queue      |
+| ("order_queue")  |
++-------------------+
+           │
+           ▼
++------------------------+
+| Background Worker (Custom) |
++------------------------+
+       │               │
+       ▼               ▼
++-------------+    +----------------+
+| Order Status|    | Update Metrics |
+| (DB Update) |    | (Redis)        |
++-------------+    +----------------+
+       │
+       ▼
++----------------------------+
+| Metrics API (FastAPI)      |
++----------------------------+
+```
+
+## ⚡ Technologies Used
+- **FastAPI** - For handling API requests.
+- **SQLite** - Lightweight database for storing orders.
+- **Redis** - In-memory queue for fast order processing.
+- **Custom Worker** - To process orders asynchronously.
+- **SQLAlchemy** - ORM for database interactions.
+- **Docker / Kubernetes** - For containerized deployment and scalability.
+
+## 🔥 Optimizations & Scalability
+✅ **Batch Processing in Workers:** Process **10-50 orders at once** instead of one-by-one.
+
+✅ **Multiple Worker Processes:** Run multiple worker instances for better parallel processing.
+
+✅ **Redis Streams Instead of List:** Use **`XADD`/`XREADGROUP`** instead of `RPUSH`/`LPOP` for better durability & scaling.
+
+✅ **SQLite Write Optimization:**
+- Use **WAL (Write-Ahead Logging) mode** for better concurrency.
+```sql
+PRAGMA journal_mode=WAL;
+```
+- Increase timeout to **prevent database lock errors**.
+```python
+connect_args={"timeout": 30}
+```
+
+✅ **Horizontal Scaling (Kubernetes, Load Balancer):**
+- Deploy **FastAPI behind a load balancer (Nginx)**.
+- Use **Redis Cluster** for high availability.
+- **Autoscale workers** based on queue size.
+
+## 🚀 How to Run
+### **1. Clone the Repository**
+```sh
+git clone https://github.com/your-repo/scalable-order-system.git
+cd scalable-order-system
+```
+
+### **2. Start Redis** (via Docker Compose)
+```sh
+docker-compose up -d redis
+```
+
+### **3. Run FastAPI Application**
+```sh
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+### **4. Start the Custom Worker**
+```sh
+python worker.py
+```
+
+### **5. Test the API**
+Use `curl` or Postman to create an order:
+```sh
+curl -X POST "http://localhost:8000/orders/" \
+     -H "Content-Type: application/json" \
+     -d '{"user_id": 1, "item_ids": [101, 102], "total_amount": 250}'
+```
+
+## 🎯 Final Thoughts
+This **design ensures scalability, efficiency, and fault tolerance**. With optimizations, it can **handle 10,000+ concurrent orders** easily! 🚀
+
+Let me know if you need improvements! 😊
+
+
