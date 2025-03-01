@@ -1,6 +1,7 @@
 # Setup Instructions
 
 ## 1. Create a Virtual Environment and Install Requirements
+
 ```sh
 python3 -m venv venv
 source venv/bin/activate
@@ -8,45 +9,59 @@ pip install -r requirements.txt
 ```
 
 ## 2. Setup Redis
+
 ### Install Redis
+
 #### For Linux:
+
 ```sh
 sudo apt install redis-server
 ```
+
 #### For macOS:
+
 ```sh
 brew install redis
 ```
 
 ### Run Redis Server
+
 ```sh
 redis-server --port 6000 --daemonize yes
 ```
 
 ## 3. Configure Environment Variables
+
 Add a `.env` file inside `app/core/` and specify the `DB_PATH`. Example:
+
 ```sh
 DB_PATH=/Users/vinit.kumar/order-process-system/test.db
 ```
 
 ## 4. Pre-Populate Database
+
 Run the script to pre-populate data:
+
 ```sh
 python pre_populate_script.py
 ```
 
 ## 5. Start the Server
+
 ```sh
 uvicorn app.main:app --reload
 ```
 
 ## 6. Import Postman Collection
+
 Import the provided Postman collection and start testing your API. 🚀
 
 ### Postman Collection Explanation
+
 The Postman collection includes the following API requests:
 
 #### 1. Create an Order (POST `/orders/`)
+
 - **Request:**
   ```json
   {
@@ -58,7 +73,13 @@ The Postman collection includes the following API requests:
 - **Response:**
   ```json
   {
-    "order_id": "ORD-1740795753808"
+      "total_amount": 999.99,
+      "user_id": "201a8e4a-c775-4266-a151-9db20b786f2d",
+      "completed_at": null,
+      "updated_at": "2025-03-01T10:11:47.509155",
+      "order_id": "ORD-f7037b2d6cb34e36a998594426a8ec67",
+      "status": "pending",
+      "created_at": "2025-03-01T10:11:47.509153"
   }
   ```
 - **Endpoints:**
@@ -66,14 +87,15 @@ The Postman collection includes the following API requests:
   - `http://51.20.56.95:8000/orders/` (AWS Server)
 
 #### 2. Get Order Status (GET `/orders/{order_id}`)
+
 - **Request:**
   ```sh
-  GET http://localhost:8000/orders/ORD-1234567890
+  GET http://localhost:8000/orders/ORD-f7037b2d6cb34e36a998594426a8ec67
   ```
 - **Response:**
   ```json
   {
-    "order_id": "ORD-1740795753808",
+    "order_id": "ORD-f7037b2d6cb34e36a998594426a8ec67",
     "status": "completed",
     "created_at": "2025-03-01T02:22:33.831868",
     "user_id": "201a8e4a-c775-4266-a151-9db20b786f2d",
@@ -84,6 +106,7 @@ The Postman collection includes the following API requests:
   ```
 
 #### 3. Get System Metrics (GET `/orders/metrics`)
+
 - **Request:**
   ```sh
   GET http://localhost:8000/orders/metrics
@@ -101,6 +124,7 @@ The Postman collection includes the following API requests:
   ```
 
 #### 4. Get Orders Status in Queue (GET `/orders/status/`)
+
 - **Request:**
   ```sh
   GET http://localhost:8000/orders/status/
@@ -111,132 +135,87 @@ This collection allows you to test order creation, order status retrieval, syste
 # Scalable Order Processing System
 
 ## 🚀 Overview
+
 This is a highly scalable order-processing system designed to handle **1000+ concurrent orders** efficiently. It utilizes **FastAPI, SQLite, Redis, and Custom Worker Processes** to process orders asynchronously and update order statuses dynamically.
 
 ## 🏗️ Architecture Design
 
 ### 📌 System Workflow
+
 1️⃣ **Order Creation API (FastAPI)**
-   - Accepts `user_id`, `item_ids`, and `total_amount`.
-   - Stores order **in SQLite** (initially **PENDING** state).
-   - Pushes `order_id` to **Redis queue** for background processing.
-   - Returns `order_id` instantly.
+
+- Accepts `user_id`, `item_ids`, and `total_amount`.
+- Stores order **in SQLite** (initially **PENDING** state).
+- Pushes `order_id` to **Redis queue** for background processing.
+- Returns order details instantly after inserting it in DB.
 
 2️⃣ **Redis Queue**
-   - Acts as a **message broker**.
-   - Stores orders in **FIFO order** for processing by workers.
+
+- Acts as a **message broker**.
+- Stores orders in **FIFO order** using `RPUSH`/`LPOP`.
+- Orders are consumed by background workers.
 
 3️⃣ **Custom Worker Process**
-   - Fetches `order_id` from Redis queue.
-   - Updates order **status → PROCESSING**.
-   - Simulates order processing (e.g., payment verification, stock check).
-   - Updates order **status → COMPLETED** in the database.
-   - Updates Redis with **order metrics** (total orders processed, avg time, etc.).
+
+- Fetches `order_id` from Redis queue.
+- Updates order **status → PROCESSING**.
+- Simulates order processing (e.g., payment verification, stock check).
+- Implements **failure handling and retries** using exponential backoff.
+- Updates order **status → COMPLETED** in the database.
+- Updates Redis with **order metrics** (total orders processed, avg time, etc.).
 
 4️⃣ **Metrics API (FastAPI)**
-   - Fetches key insights:
-     - **Total orders processed**.
-     - **Average processing time**.
-     - **Orders count per status (PENDING, PROCESSING, COMPLETED)**.
-   - Uses **Redis for real-time metrics** to avoid slow DB queries.
 
-## 📊 System Design Diagram
-```
-+-----------------------+
-|   Order API (FastAPI) |
-+-----------------------+
-           │
-           ▼
-+---------------------+
-|  SQLite Database  |
-+---------------------+
-           │
-           ▼
-+-------------------+
-| Redis Queue      |
-| ("order_queue")  |
-+-------------------+
-           │
-           ▼
-+------------------------+
-| Background Worker (Custom) |
-+------------------------+
-       │               │
-       ▼               ▼
-+-------------+    +----------------+
-| Order Status|    | Update Metrics |
-| (DB Update) |    | (Redis)        |
-+-------------+    +----------------+
-       │
-       ▼
-+----------------------------+
-| Metrics API (FastAPI)      |
-+----------------------------+
-```
+- Fetches key insights:
+  - **Total orders processed**.
+  - **Average processing time**.
+  - **Orders count per status (PENDING, PROCESSING, COMPLETED)**.
+  - **Queue length and pending orders in Redis**.
 
-## ⚡ Technologies Used
-- **FastAPI** - For handling API requests.
-- **SQLite** - Lightweight database for storing orders.
-- **Redis** - In-memory queue for fast order processing.
-- **Custom Worker** - To process orders asynchronously.
-- **SQLAlchemy** - ORM for database interactions.
-- **Docker / Kubernetes** - For containerized deployment and scalability.
+## 📊 Database Schema Design
 
-## 🔥 Optimizations & Scalability
-✅ **Batch Processing in Workers:** Process **10-50 orders at once** instead of one-by-one.
+### Users Table
+| Column  | Type      | Description         |
+|---------|----------|---------------------|
+| id      | TEXT (PK)| Unique user ID      |
+| name    | TEXT     | User name           |
+| email   | TEXT     | Unique user email   |
+| is_active | BOOLEAN | Active status       |
 
-✅ **Multiple Worker Processes:** Run multiple worker instances for better parallel processing.
+### Items Table
+| Column  | Type      | Description         |
+|---------|----------|---------------------|
+| id      | TEXT (PK)| Unique item ID      |
+| name    | TEXT     | Item name           |
+| description | TEXT | Item description    |
+| price   | FLOAT    | Item price          |
+| is_active | BOOLEAN | Active status      |
 
-✅ **Redis Streams Instead of List:** Use **`XADD`/`XREADGROUP`** instead of `RPUSH`/`LPOP` for better durability & scaling.
+### Orders Table
+| Column         | Type          | Description                        |
+|---------------|--------------|------------------------------------|
+| order_id      | TEXT (PK)     | Unique order identifier           |
+| user_id       | TEXT (FK → users.id) | User who placed the order         |
+| total_amount  | FLOAT         | Total order amount                |
+| status        | TEXT          | Order status (pending, processing, completed) |
+| created_at    | DATETIME      | Order creation timestamp          |
+| updated_at    | DATETIME      | Last update timestamp             |
+| completed_at  | DATETIME NULL | Completion timestamp (if completed) |
 
-✅ **SQLite Write Optimization:**
-- Use **WAL (Write-Ahead Logging) mode** for better concurrency.
-```sql
-PRAGMA journal_mode=WAL;
-```
-- Increase timeout to **prevent database lock errors**.
-```python
-connect_args={"timeout": 30}
-```
+### Order Items Table (Many-to-Many Relationship)
+| Column    | Type          | Description                        |
+|----------|--------------|------------------------------------|
+| order_id | TEXT (FK → orders.order_id) | Associated order |
+| item_id  | TEXT (FK → items.id) | Associated item |
+| quantity | INTEGER       | Quantity ordered |
+| price_at_time | FLOAT | Price at the time of order |
 
-✅ **Horizontal Scaling (Kubernetes, Load Balancer):**
-- Deploy **FastAPI behind a load balancer (Nginx)**.
-- Use **Redis Cluster** for high availability.
-- **Autoscale workers** based on queue size.
+## 🚀 Load Testing
 
-## 🚀 How to Run
-### **1. Clone the Repository**
+A **Locust-based load testing script** is available in the `load_testing` folder. Use it to simulate high traffic and measure system performance.
+
 ```sh
-git clone https://github.com/your-repo/scalable-order-system.git
-cd scalable-order-system
+cd load_testing
+locust -f locustfile.py
 ```
-
-### **2. Start Redis** (via Docker Compose)
-```sh
-docker-compose up -d redis
-```
-
-### **3. Run FastAPI Application**
-```sh
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
-
-### **4. Start the Custom Worker**
-```sh
-python worker.py
-```
-
-### **5. Test the API**
-Use `curl` or Postman to create an order:
-```sh
-curl -X POST "http://localhost:8000/orders/" \
-     -H "Content-Type: application/json" \
-     -d '{"user_id": 1, "item_ids": [101, 102], "total_amount": 250}'
-```
-
-## 🎯 Final Thoughts
-This **design ensures scalability, efficiency, and fault tolerance**. With optimizations, it can **handle 10,000+ concurrent orders** easily! 🚀
-
-Let me know if you need improvements! 😊
-
 
