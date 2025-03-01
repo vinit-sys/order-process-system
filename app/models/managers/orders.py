@@ -4,6 +4,7 @@ from sqlalchemy.future import select
 from ..items import Item
 from ..user import User
 from ..order import Order, OrderStatus, order_items
+from datetime import datetime
 
 class OrderManager:
     def __init__(self, session: AsyncSession):
@@ -71,6 +72,9 @@ class OrderManager:
                     for key, value in kwargs.items():
                         if hasattr(order, key):
                             setattr(order, key, value)
+                        if key == "status" and value == OrderStatus.COMPLETED:
+                            setattr(order, "completed_at", datetime.now())
+                            
                 await self.session.commit()
         except SQLAlchemyError as e:
             await self.session.rollback()
