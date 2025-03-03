@@ -1,3 +1,10 @@
+# UPDATE
+
+```sh
+My Public IP is changed to http://13.49.181.224/
+Please use this
+```
+
 # Setup Instructions
 
 ## 1. Create a Virtual Environment and Install Requirements
